@@ -1,6 +1,5 @@
 import os
 import tempfile
-from pathlib import Path
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -16,9 +15,7 @@ from langchain.schema import Document
 from googleapiclient.discovery import build
 
 # ───────── 환경 변수 로드 ─────────
-dotenv_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path)
-
+load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
