@@ -1,7 +1,8 @@
 streamlit
-openai
-langchain
-faiss-cpu
-pypdf
-google-api-python-client
 python-dotenv
+langchain
+pypdf
+langchain-community
+google-api-python-client
+faiss-cpu
+openai
