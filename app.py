@@ -2,7 +2,13 @@ import os
 import tempfile
 
 import streamlit as st
-from dotenv import load_dotenv
+
+# dotenv import 시도 & 실패 시 안내 메시지 처리 (배포 환경 문제 방지용)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # .env에서 환경변수 로드
+except ImportError:
+    st.warning("python-dotenv 패키지가 설치되어 있지 않습니다. 환경변수는 다른 방식으로 설정해주세요.")
 
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -14,8 +20,7 @@ from langchain.schema import Document
 
 from googleapiclient.discovery import build
 
-# ───────── 환경 변수 로드 ─────────
-load_dotenv()
+
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
@@ -25,14 +30,14 @@ if not OPENAI_API_KEY:
 if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
     st.error("`.env`에 GOOGLE_API_KEY와 GOOGLE_CSE_ID를 설정해주세요.")
 
-# ───────── PDF → Document 리스트 ─────────
+
 def load_and_split_pdf(file_path: str):
     loader = PyPDFLoader(file_path)
     pages = loader.load_and_split()
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     return splitter.split_documents(pages)
 
-# ───────── 웹검색 → Document 리스트 ─────────
+
 def web_search_docs(query: str, num_results: int = 5):
     service = build("customsearch", "v1", developerKey=GOOGLE_API_KEY)
     res = service.cse().list(q=query, cx=GOOGLE_CSE_ID, num=num_results).execute()
@@ -46,7 +51,7 @@ def web_search_docs(query: str, num_results: int = 5):
         docs.append(Document(page_content=content, metadata={"source": link}))
     return docs
 
-# ───────── QA 체인 생성 ─────────
+
 def setup_qa_chain(documents, model_name: str = "gpt-4"):
     vector_store = FAISS.from_documents(documents, OpenAIEmbeddings())
     llm = ChatOpenAI(model=model_name, openai_api_key=OPENAI_API_KEY)
@@ -55,17 +60,17 @@ def setup_qa_chain(documents, model_name: str = "gpt-4"):
         llm=llm,
         retriever=retriever,
         chain_type="stuff",
-        return_source_documents=True
+        return_source_documents=True,
     )
 
-# ───────── rerun 호환성 처리 ─────────
+
 def rerun():
     if hasattr(st, "rerun"):
         st.rerun()
     else:
         st.experimental_rerun()
 
-# ───────── Streamlit 앱 ─────────
+
 def run_app():
     st.set_page_config(page_title="회원가입 고객상담 챗봇", page_icon="🤖", layout="wide")
 
@@ -74,7 +79,7 @@ def run_app():
         <h1 style="text-align:center; color:#6C63FF;">📚 회원가입 고객상담 챗봇</h1>
         <p style="text-align:center;">업로드한 <strong>PDF FAQ</strong>와 <strong>웹검색</strong>을 통해 답변을 제공합니다.</p>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     st.sidebar.header("⚙️ 설정")
@@ -114,14 +119,16 @@ def run_app():
                 pdf_answer = pdf_res.get("result", "").strip()
                 pdf_sources = pdf_res.get("source_documents", [])
 
-            st.session_state.history.append({
-                "query": actual_query,
-                "pdf_answer": pdf_answer,
-                "pdf_sources": pdf_sources,
-                "web_answer": None,
-                "web_sources": [],
-                "web_searched": False
-            })
+            st.session_state.history.append(
+                {
+                    "query": actual_query,
+                    "pdf_answer": pdf_answer,
+                    "pdf_sources": pdf_sources,
+                    "web_answer": None,
+                    "web_sources": [],
+                    "web_searched": False,
+                }
+            )
 
             rerun()
 
@@ -182,6 +189,7 @@ def run_app():
                 for doc in web_res.get("source_documents", []):
                     url = doc.metadata.get("source", "")
                     st.markdown(f"- 🌍 [참고 자료]({url})")
+
 
 if __name__ == "__main__":
     run_app()
