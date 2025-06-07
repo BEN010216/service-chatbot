@@ -4,3 +4,4 @@ openai
 google-api-python-client
 faiss-cpu
 python-dotenv
+pypdf
