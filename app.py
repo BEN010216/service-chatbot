@@ -68,7 +68,7 @@ def run_app():
 
     st.markdown(
         """
-        <h1 style="text-align:center; color:#6C63FF;">📚 회원가입 고객상담 챗봇</h1>
+        <h1 style="text-align:center; color:#6C63FF;">📚 회원가입 고객상담 챗봇(네이버,카카오,다음,구글)</h1>
         <p style="text-align:center;">업로드한 <strong>PDF FAQ</strong>와 <strong>웹검색</strong>을 통해 답변을 제공합니다.</p>
         """,
         unsafe_allow_html=True
