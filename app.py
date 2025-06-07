@@ -1,8 +1,6 @@
-import os
 import tempfile
 
 import streamlit as st
-from dotenv import load_dotenv
 
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -14,16 +12,15 @@ from langchain.schema import Document
 
 from googleapiclient.discovery import build
 
-# ───────── 환경 변수 로드 ─────────
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID")
+# ───────── Streamlit Secrets에서 API 키 로드 ─────────
+OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY")
+GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY")
+GOOGLE_CSE_ID = st.secrets.get("GOOGLE_CSE_ID")
 
 if not OPENAI_API_KEY:
-    st.error("`.env`에 OPENAI_API_KEY를 설정해주세요.")
+    st.error("Streamlit Secrets에 OPENAI_API_KEY를 등록해주세요.")
 if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
-    st.error("`.env`에 GOOGLE_API_KEY와 GOOGLE_CSE_ID를 설정해주세요.")
+    st.error("Streamlit Secrets에 GOOGLE_API_KEY와 GOOGLE_CSE_ID를 등록해주세요.")
 
 # ───────── PDF → Document 리스트 ─────────
 def load_and_split_pdf(file_path: str):
